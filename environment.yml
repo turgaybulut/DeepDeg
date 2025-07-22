@@ -1,4 +1,4 @@
-name: deepdeg_test
+name: deepdeg
 channels:
   - conda-forge
 dependencies:
