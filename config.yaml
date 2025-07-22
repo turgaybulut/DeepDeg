@@ -8,8 +8,8 @@ reproducibility:
 data:
   paths:
     sequence_data: "data/human_sequence_data.csv"
-    feature_data: "data/full_features_dataset.csv"
-    merged_embeddings: "data/merged_embeddings.npy"
+    feature_data: "data/human_feature_data.csv"
+    merged_embeddings: "data/mrnalm_embeddings.npy"
   columns:
     sequence_id: "ENSID"
     feature_id: "ENSID"
@@ -40,7 +40,7 @@ model:
     dense_units: 128
     activation: "leaky_relu"
   regularization:
-    dropout_rate: 0.7
+    dropout_rate: 0.5
 
 # Training Configuration
 training:
@@ -50,17 +50,17 @@ training:
   learning_rate: 0.001
   # Early Stopping and LR Scheduler settings
   early_stopping_patience: 10
-  reduce_lr_patience: 5
+  reduce_lr_patience: 3
   reduce_lr_factor: 0.5
-  min_lr: 1.0e-6
+  min_lr: 1.0e-8
 
 # Feature Processing
 features:
   selection:
     # Using xgboost for feature selection
-    n_estimators: 100
+    n_estimators: 256
     max_depth: 6
-    learning_rate: 0.1
+    learning_rate: 0.01
     device: "cuda"
     tree_method: "hist"
     # Number of top features to select
