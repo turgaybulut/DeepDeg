@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deepdeg"
+version = "0.1.0"
+authors = [
+    {name = "Turgay Bulut", email = "turgay.bulut@ozu.edu.tr"},
+]
+description = "DeepDeg: Hybrid ViT-CNN Model for Predicting mRNA Degradation."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "torchvision",
+    "torchaudio",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "pydantic",
+    "pyyaml",
+    "xgboost",
+    "joblib",
+    "shap",
+    "matplotlib",
+    "scipy",
+    "biopython",
+    "gffutils",
+    "modlamp",
+    "pyteomics",
+    "tqdm",
+]
+
+[tool.setuptools]
+packages = [
+    "config",
+    "data_handling", 
+    "models",
+    "training",
+    "utils"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/turgaybulut/DeepDeg"

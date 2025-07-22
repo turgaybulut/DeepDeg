@@ -1,0 +1,84 @@
+# DeepDeg Configuration File
+
+# Reproducibility
+reproducibility:
+  random_seed: 654
+
+# Data Configuration
+data:
+  paths:
+    sequence_data: "data/human_sequence_data.csv"
+    feature_data: "data/full_features_dataset.csv"
+    merged_embeddings: "data/merged_embeddings.npy"
+  columns:
+    sequence_id: "ENSID"
+    feature_id: "ENSID"
+    target: "HALFLIFE"
+  split:
+    test_size: 0.2
+    # val_size is the proportion of the (1 - test_size) data
+    val_size: 0.25
+
+# Model Architecture Configuration
+model:
+  vit:
+    patch_size: 16
+    projection_dim: 128
+    num_layers: 8
+    num_attention_heads: 8
+    mlp_units: [256]
+    dropout_rate: 0.25
+  cnn:
+    filters: 32
+    kernel_size: 3
+    pool_size: 2
+    activation: "leaky_relu"
+  features:
+    dense_units: [512, 256]
+    activation: "leaky_relu"
+  final:
+    dense_units: 128
+    activation: "leaky_relu"
+  regularization:
+    dropout_rate: 0.7
+
+# Training Configuration
+training:
+  epochs: 200
+  batch_size: 256
+  optimizer: "adamw"
+  learning_rate: 0.001
+  # Early Stopping and LR Scheduler settings
+  early_stopping_patience: 10
+  reduce_lr_patience: 5
+  reduce_lr_factor: 0.5
+  min_lr: 1.0e-6
+
+# Feature Processing
+features:
+  selection:
+    # Using xgboost for feature selection
+    n_estimators: 100
+    max_depth: 6
+    learning_rate: 0.1
+    device: "cuda"
+    tree_method: "hist"
+    # Number of top features to select
+    k: 450
+  normalization:
+    method: "standard_scaler"
+
+# Output Configuration
+output:
+  results_dir: "results"
+  model_artifacts:
+    model_filename: "deepdeg_model.pth"
+    scaler_filename: "feature_scaler.pkl"
+    selector_filename: "feature_selector.json"
+
+# SHAP Analysis Configuration
+shap:
+  enabled: true
+  num_background_samples: 1000
+  num_test_samples: 50
+  max_display: 20
