@@ -47,7 +47,7 @@ The following scripts can be used with your own datasets by providing the necess
         *   `<input_file>`: Path to input CSV file with sequence data.
         *   `<output_file>`: Path to output CSV file for features.
     *   **Options**:
-        *   `--features <type> [<type> ...]`: Feature types to extract (choices: `basic`, `nucleic_acid`, `peptide`, `modlamp`, `enzymatic`, `all`). Default: `all`.
+        *   `--features <type> [<type> ...]`: Feature types to extract (choices: `nucleic_acid`, `peptide`, `modlamp`, `enzymatic`, `all`). Default: `all`.
         *   `--batch-size <int>`: Batch size for processing. Default: `100`.
         *   `--num-cores <int>`: Number of CPU cores for parallel processing. Default: system's CPU count.
 *   **`scripts/data_augmenter.py`**: Augment the data.
