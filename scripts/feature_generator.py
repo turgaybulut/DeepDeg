@@ -100,7 +100,7 @@ def translate_sequence(sequence: str) -> str:
     if remainder != 0:
         sequence = sequence[:-remainder]
 
-    return str(Seq(sequence).translate())
+    return str(Seq(sequence).translate(to_stop=True))
 
 
 def get_modlamp_features(peptide_sequence: str) -> Dict[str, Any]:
