@@ -8,9 +8,7 @@ import sys
 from typing import Any, Dict, List, Set, Tuple, Union
 
 from Bio.Seq import Seq
-from Bio.SeqUtils import gc_fraction
 from PyBioMed import Pydna, Pyprotein
-import gffutils
 from modlamp.descriptors import GlobalDescriptor
 import numpy as np
 import pandas as pd
@@ -20,78 +18,16 @@ from tqdm import tqdm
 CODON_LENGTH = 3
 KILOBASE_DIVISOR = 1000
 MISSED_CLEAVAGES = 0
-DEFAULT_GTF_PATH = "data/Homo_sapiens.GRCh38.100.chr.gtf.gz"
 DEFAULT_BATCH_SIZE = 100
 DEFAULT_NUM_CORES = mp.cpu_count()
 
 
 class FeatureType(Enum):
-    BASIC = "basic"
     NUCLEIC_ACID = "nucleic_acid"
     PEPTIDE = "peptide"
     MODLAMP = "modlamp"
     ENZYMATIC = "enzymatic"
     ALL = "all"
-
-
-def load_gtf(gtf_path: str = DEFAULT_GTF_PATH):
-    db_path = gtf_path.replace(".gz", "") + ".db"
-    if not os.path.exists(db_path):
-        gffutils.create_db(
-            gtf_path,
-            dbfn=db_path,
-            force=True,
-            keep_order=True,
-            disable_infer_transcripts=True,
-            disable_infer_genes=True,
-        )
-    return gffutils.FeatureDB(db_path)
-
-
-GTF_DB = load_gtf()
-
-
-def get_basic_features(ensid, utr5_seq, orf_seq, utr3_seq):
-    feats = {
-        "basic_5utr_len": len(utr5_seq),
-        "basic_cds_len": len(orf_seq),
-        "basic_3utr_len": len(utr3_seq),
-        "basic_5utr_gc": gc_fraction(utr5_seq) if utr5_seq else 0,
-        "basic_cds_gc": gc_fraction(orf_seq) if orf_seq else 0,
-        "basic_3utr_gc": gc_fraction(utr3_seq) if utr3_seq else 0,
-    }
-
-    try:
-        tx = max(
-            GTF_DB.children(ensid, featuretype="transcript"),
-            key=lambda t: sum(
-                (e.end or 0) - (e.start or 0) + 1
-                for e in GTF_DB.children(t, featuretype="CDS")
-                if e.end is not None and e.start is not None
-            ),
-        )
-        exons = list(GTF_DB.children(tx, featuretype="exon"))
-        cds = list(GTF_DB.children(tx, featuretype="CDS"))
-
-        valid_exons = sorted(
-            [e for e in exons if e.start is not None and e.end is not None],
-            key=lambda ex: ex.start or 0,
-        )
-
-        feats["basic_intron_len"] = sum(
-            ((valid_exons[i + 1].start or 0) - (valid_exons[i].end or 0) - 1)
-            for i in range(len(valid_exons) - 1)
-            if valid_exons[i + 1].start is not None and valid_exons[i].end is not None
-        )
-        feats["basic_orf_exon_density"] = (
-            (len(cds) - 1) / (len(orf_seq) / KILOBASE_DIVISOR) if len(orf_seq) else 0
-        )
-    except Exception:
-        print(f"Error getting basic features for {ensid}")
-        feats["basic_intron_len"] = 0
-        feats["basic_orf_exon_density"] = 0
-
-    return feats
 
 
 def translate_sequence(sequence: str) -> str:
@@ -204,9 +140,6 @@ def extract_features(row: pd.Series, feature_types: Set[FeatureType]) -> Dict[st
     utr5_seq, orf_seq, utr3_seq = str(row["5UTR"]), str(row["ORF"]), str(row["3UTR"])
     expanded_types = _expand_all_features(feature_types)
     features: Dict[str, Any] = {}
-
-    if FeatureType.BASIC in expanded_types:
-        features.update(get_basic_features(row["ENSID"], utr5_seq, orf_seq, utr3_seq))
 
     if FeatureType.NUCLEIC_ACID in expanded_types:
         features.update(
